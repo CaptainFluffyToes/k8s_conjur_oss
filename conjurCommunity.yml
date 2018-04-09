@@ -1,8 +1,15 @@
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: conjur-oss
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: conjur-community
+  namespace: conjur-oss
   labels:
     app: conjur
 spec:
@@ -35,6 +42,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: conjur-ui
+  namespace: conjur-oss
 spec:
   ports:
   - name: conjur-ui
@@ -43,5 +51,3 @@ spec:
   selector:
     app: conjur
   type: NodePort
- 
-  
