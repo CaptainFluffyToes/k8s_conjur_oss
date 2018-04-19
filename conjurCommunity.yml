@@ -11,31 +11,44 @@ metadata:
   name: conjur-community
   namespace: conjur-oss
   labels:
-    app: conjur
+    app: conjurOSS
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: conjur
+      app: conjurOSS
   template:
     metadata:
       labels:
-        app: conjur
+        app: conjurOSS
     spec:
       containers:
       - name: conjur-database
-        image: postgres
+        image: postgres:9.3
       - name: conjur-master
         image: cyberark/conjur
+        env:
+          - name: DATABASE_URL
+            value: "postgres://postgres@conjur-database/postgres"
+          - name: CONJUR_DATA_KEY
+            value: "Eb/WhB7csC3v68/h4Ye6l/SpSBM5OwqhEfJm9JFFYP0="
         ports:
           - name: conjur-ui
-            containerPort: 3000
-          - name: https
-            containerPort: 443
-        args: ["DATABASE_URL=postgres://postgres@conjur-database/postgres", "CONJUR_DATA_KEY=89898989898989"]
-        command: ["server"]
+            containerPort: 80
+        args: ["server"]
       - name: conjur-cli
         image: conjurinc/cli5
+        env:
+          - name: CONJUR_APPLIANCE_URL
+            value: http://conjur-master
+          - name: CONJUR_ACCOUNT
+            value: 
+          - name: CONJUR_AUTHN_API_KEY
+            value: 
+          - name: CONJUR_AUTHN_LOGIN
+            value:
+        command: ["sleep"]
+        args: ["infinity"]
         
 ---
 apiVersion: v1
@@ -46,8 +59,8 @@ metadata:
 spec:
   ports:
   - name: conjur-ui
-    port: 3000
-    targetPort: 3000
+    port: 80
+    targetPort: 80
   selector:
-    app: conjur
+    app: conjurOSS
   type: NodePort
