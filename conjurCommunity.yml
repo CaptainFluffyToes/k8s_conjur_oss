@@ -25,11 +25,16 @@ spec:
       containers:
       - name: conjur-database
         image: postgres:9.3
+        ports:
+          - name: postgres1
+            containerPort: 5432
+          - name: postgres2
+            containerPort: 5433
       - name: conjur-master
         image: cyberark/conjur
         env:
           - name: DATABASE_URL
-            value: "postgres://postgres@conjur-database/postgres"
+            value: "postgres://postgres@conjur-database.conjur-oss.svc.cluster.local/postgres"
           - name: CONJUR_DATA_KEY
             value: "Eb/WhB7csC3v68/h4Ye6l/SpSBM5OwqhEfJm9JFFYP0="
         ports:
@@ -61,6 +66,24 @@ spec:
   - name: conjur-ui
     port: 80
     targetPort: 80
+  selector:
+    app: conjurOSS
+  type: NodePort
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conjur-database
+  namespace: conjur-oss
+spec:
+  ports:
+  - name: postgres1
+    port: 5432
+    targetPort: 5432
+  - name: postgres2
+    port: 5433
+    targetPort: 5433
   selector:
     app: conjurOSS
   type: NodePort
