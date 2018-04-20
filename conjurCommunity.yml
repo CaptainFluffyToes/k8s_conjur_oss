@@ -2,28 +2,28 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: conjur-oss
+  name: conjur-ce
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: conjur-community
-  namespace: conjur-oss
+  namespace: conjur-ce
   labels:
-    app: conjurOSS
+    app: conjur-ce
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: conjurOSS
+      app: conjur-ce
   template:
     metadata:
       labels:
-        app: conjurOSS
+        app: conjur-ce
     spec:
       containers:
-      - name: conjur-database
+      - name: conjur-ce-database
         image: postgres:9.3
         ports:
           - name: postgres1
@@ -34,18 +34,18 @@ spec:
         image: cyberark/conjur
         env:
           - name: DATABASE_URL
-            value: "postgres://postgres@conjur-database.conjur-oss.svc.cluster.local/postgres"
+            value: "postgres://postgres@conjur-ce-database.conjur-ce.svc.cluster.local/postgres"
           - name: CONJUR_DATA_KEY
             value: "Eb/WhB7csC3v68/h4Ye6l/SpSBM5OwqhEfJm9JFFYP0="
         ports:
-          - name: conjur-ui
+          - name: conjur-ce-ui
             containerPort: 80
         args: ["server"]
       - name: conjur-cli
         image: conjurinc/cli5
         env:
           - name: CONJUR_APPLIANCE_URL
-            value: http://conjur-master
+            value: http://conjur-ce-ui.conjur-ce.svc.cluster.local
           - name: CONJUR_ACCOUNT
             value: 
           - name: CONJUR_AUTHN_API_KEY
@@ -59,23 +59,23 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: conjur-ui
-  namespace: conjur-oss
+  name: conjur-ce-ui
+  namespace: conjur-ce
 spec:
   ports:
   - name: conjur-ui
     port: 80
     targetPort: 80
   selector:
-    app: conjurOSS
+    app: conjur-ce
   type: NodePort
   
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: conjur-database
-  namespace: conjur-oss
+  name: conjur-ce-database
+  namespace: conjur-ce
 spec:
   ports:
   - name: postgres1
@@ -85,5 +85,5 @@ spec:
     port: 5433
     targetPort: 5433
   selector:
-    app: conjurOSS
+    app: conjur-ce
   type: NodePort
