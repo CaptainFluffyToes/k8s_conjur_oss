@@ -1,0 +1,16 @@
+---
+- &variables
+  - !variable password
+  
+- !group secrets-users
+
+- !user secret-admin
+
+- !grant
+  role: !group secrets-users
+  member: !user secret-admin
+
+- !permit
+  resource: *variables
+  privileges: [read, execute]
+  roles: !group secrets-users
