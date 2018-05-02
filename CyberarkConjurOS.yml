@@ -2,28 +2,28 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: conjur-ce
+  name: cyberark-conjur-os
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: conjur-cluster
-  namespace: conjur-ce
+  name: cluster
+  namespace: cyberark-conjur-os
   labels:
-    app: conjur-community
+    app: conjur
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: conjur
+      app: cluster
   template:
     metadata:
       labels:
-        app: conjur
+        app: cluster
     spec:
       containers:
-      - name: conjur-database
+      - name: database
         imagePullPolicy: Always
         image: postgres:9.3
         ports:
@@ -36,19 +36,19 @@ spec:
             port: 5432
           initialDelaySeconds: 20
           periodSeconds: 10
-      - name: conjur-master
+      - name: master
         imagePullPolicy: Always
         image: cyberark/conjur
         env:
           - name: DATABASE_URL
-            value: "postgres://postgres@conjur.conjur-ce.svc.cluster.local/postgres"
+            value: "postgres://postgres@conjur.cyberark-conjur-os.svc.cluster.local/postgres"
           - name: CONJUR_DATA_KEY
             value: "Eb/WhB7csC3v68/h4Ye6l/SpSBM5OwqhEfJm9JFFYP0="
         ports:
           - name: conjur-ui
             containerPort: 80
         args: ["server"]      
-      - name: conjur-cli
+      - name: cli
         imagePullPolicy: Always
         image: conjurinc/cli5
         command: ["sleep"]
@@ -59,7 +59,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: conjur
-  namespace: conjur-ce
+  namespace: cyberark-conjur-os
 spec:
   ports:
   - name: conjur-ui
@@ -72,5 +72,5 @@ spec:
     port: 5433
     targetPort: 5433
   selector:
-    app: conjur
+    app: cluster
   type: NodePort

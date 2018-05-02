@@ -1,20 +1,20 @@
 #! /bin/sh
 
 #Cluster Variables
-namespace=conjur-ce
-master_container_name=conjur-master
-master_deployment_name=conjur-cluster
+namespace=cyberark-conjur-os
+master_container_name=master
+master_deployment_name=cluster
 master_pod_name=$(kubectl -n $namespace get pods | grep $master_deployment_name | awk '{print $1;}')
 master_service_name=conjur
 master_service_url=http://$master_service_name.$namespace.svc.cluster.local
 
 #CLI varilables
-cli_container_name=conjur-cli
+cli_container_name=cli
 cli_deployment_name=$master_deployment_name
 cli_pod_name=$(kubectl -n $namespace get pods | grep $cli_deployment_name | awk '{print $1;}')
 
 #Account
-default_account=conjur
+default_account=cyberark
 
 #Generate API KEY
 API_KEY=$(kubectl -n $namespace exec $master_pod_name -c $master_container_name -i -t conjurctl account create $default_account | awk '/admin:/{print $5}' | tr -d '\r\n')

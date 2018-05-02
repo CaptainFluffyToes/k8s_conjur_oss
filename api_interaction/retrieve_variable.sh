@@ -6,8 +6,8 @@ function main(){
 }
 
 function variable_pull(){
-	local CONJUR_APPLIANCE_URL=http://conjur.conjur-ce.svc.cluster.local
-	local CONJUR_ACCOUNT=conjur
+	local CONJUR_APPLIANCE_URL=http://conjur.cyberark-conjur-os.svc.cluster.local
+	local CONJUR_ACCOUNT=cyberark
 	#URL ENCODED ie alice@devops must be encoded as alice%40devops
 	local CONJUR_AUTHN_LOGIN=secret-admin
 	local CONJUR_AUTHN_API_KEY=$(cat /root/policy/api_key)
