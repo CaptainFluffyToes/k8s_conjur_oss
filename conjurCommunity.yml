@@ -6,24 +6,25 @@ metadata:
 
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: conjur-community
+  name: conjur-cluster
   namespace: conjur-ce
+  labels:
+    app: conjur-community
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: conjur-ce-backend
-  serviceName: "conjur-ce-backend"
-  replicas: 1
+      app: conjur
   template:
     metadata:
       labels:
-        app: conjur-ce-backend
+        app: conjur
     spec:
       containers:
-      - name: conjur-ce-database
-        imagePullPolicy: IfNotPresent
+      - name: conjur-database
+        imagePullPolicy: Always
         image: postgres:9.3
         ports:
           - name: postgres1
@@ -35,8 +36,8 @@ spec:
             port: 5432
           initialDelaySeconds: 20
           periodSeconds: 10
-      - name: conjur-ce-master
-        imagePullPolicy: IfNotPresent
+      - name: conjur-master
+        imagePullPolicy: Always
         image: cyberark/conjur
         env:
           - name: DATABASE_URL
@@ -44,41 +45,12 @@ spec:
           - name: CONJUR_DATA_KEY
             value: "Eb/WhB7csC3v68/h4Ye6l/SpSBM5OwqhEfJm9JFFYP0="
         ports:
-          - name: conjur-ce-ui
+          - name: conjur-ui
             containerPort: 80
-        args: ["server"]
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: conjur-community-cli
-  namespace: conjur-ce
-  labels:
-    app: conjur-ce
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: conjur-ce-cli
-  template:
-    metadata:
-      labels:
-        app: conjur-ce-cli
-    spec:
-      containers:
+        args: ["server"]      
       - name: conjur-cli
         imagePullPolicy: Always
         image: conjurinc/cli5
-        env:
-          - name: CONJUR_APPLIANCE_URL
-            value: http://conjur.conjur-ce.svc.cluster.local
-          - name: CONJUR_ACCOUNT
-            value: 
-          - name: CONJUR_AUTHN_API_KEY
-            value: 
-          - name: CONJUR_AUTHN_LOGIN
-            value:
         command: ["sleep"]
         args: ["infinity"]
         
@@ -90,7 +62,7 @@ metadata:
   namespace: conjur-ce
 spec:
   ports:
-  - name: conjur-ce-ui
+  - name: conjur-ui
     port: 80
     targetPort: 80
   - name: postgres1
@@ -100,5 +72,5 @@ spec:
     port: 5433
     targetPort: 5433
   selector:
-    app: conjur-ce-backend
+    app: conjur
   type: NodePort
